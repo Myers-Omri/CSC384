@@ -42,6 +42,8 @@
        all of the factors a variable is involved in. 
 
     '''
+import copy
+import itertools
 
 class Variable:
     '''Class for defining Bayes Net variables. '''
@@ -219,7 +221,7 @@ class Factor:
         C.domain() = ['heavy', 'light'], and we invoke this function
         on the list [1, 'b', 'heavy'] we would get a return value
         equal to the value of this factor on the assignment (A=1,
-        B='b', C='light')'''
+        B='b', C='heavy')'''
 
         index = 0
         for v in self.scope:
@@ -309,7 +311,25 @@ def restrict_factor(f, var, value):
     Return a new factor that is the restriction of f by this var = value.
     Don't change f! If f has only one variable its restriction yields a
     constant factor'''
+    new_vars = f.get_scope()
+    new_vars.remove(var)
+    new_factor = Factor("n-{}".format(f.name), new_vars)
+    var_dom_list = []
+    v_index = 0
+    for i, vl in enumerate(new_vars):
+        if vl.name == var.name:
+            var_dom_list.append([value])
+            v_index += i
+        else:
+            var_dom_list.append(vl.domain())
+    all_comb = itertools.product(var_dom_list)
 
+    for c in all_comb:
+        new_prob = f.get_value(c)
+        c.pop(v_index)
+        c.append(new_prob)
+        new_factor.add_values(c)
+        
     #You must implement this function
 
 def sum_out_variable(f, var):
@@ -405,5 +425,49 @@ def VE(Net, QueryVar, EvidenceVars):
    Pr(A='a'|B=1, C='c') = 0.26
  
     '''
+
+    # for i,h in enumerate(hiddens):
+    #     if not (h in EvidenceVars):
+    #         hiddens.remove(h)
+
+
+    bn_factors = Net.factors()
+    for factor in bn_factors:
+        for e in EvidenceVars:
+            if e in factor.get_scope():
+                factor = restrict_factor(factor, e, e.get_evidence())
+    hiddens = min_fill_ordering(bn_factors, QueryVar)
+
+    for z in hiddens:
+        factors_over_z = get_factors_over_z(bn_factors, z) #TODO: implement get_factors_over_z(Net.Factors(), z)
+        new_factor = multiply_factors(factors_over_z)
+        for f in bn_factors:
+            if f in factors_over_z:
+                bn_factors.remove(f)
+        bn_factors.append(f)
+
+    new_factor = multiply_factors(bn_factors)
+    qv_dom = QueryVar.domain()
+    qv_dist = []
+    p_sum = 0
+    for i, d in enumerate(qv_dom):
+        new_prob = new_factor.get_value([d])
+        qv_dist.append(new_prob)
+        p_sum += new_prob
+
+    for npr in qv_dist:
+        npr /= p_sum
+
+    return qv_dist
+
+
+
+
+
+
+
+
+
+
     #You must implement this function
 
