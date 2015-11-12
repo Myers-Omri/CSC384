@@ -169,7 +169,7 @@ class Factor:
             index = 0
             for v in self.scope:
                 index = index * v.domain_size() + v.value_index(t[0])
-                t = t[1:]
+                t = t[1:]#figure out why out of bound when send values of 2 (one for the var and 1 for the val?
             self.values[index] = t[0]
          
     def add_value_at_current_assignment(self, number): 
@@ -312,8 +312,7 @@ def restrict_factor(f, var, value):
     Don't change f! If f has only one variable its restriction yields a
     constant factor'''
     new_vars = f.get_scope()
-    new_vars.remove(var)
-    new_factor = Factor("n-{}".format(f.name), new_vars)
+
     var_dom_list = []
     v_index = 0
     for i, vl in enumerate(new_vars):
@@ -322,13 +321,17 @@ def restrict_factor(f, var, value):
             v_index += i
         else:
             var_dom_list.append(vl.domain())
-    all_comb = itertools.product(var_dom_list)
+    all_comb = itertools.product(var_dom_list) #check what iter tools does.
+    new_vars.remove(var)
+    new_factor = Factor("n-{}".format(f.name), new_vars)
 
-    for c in all_comb:
-        new_prob = f.get_value(c)
-        c.pop(v_index)
-        c.append(new_prob)
-        new_factor.add_values(c)
+    for cc in all_comb:
+        ccl = list(cc)
+        new_prob = f.get_value(ccl[0])
+        ccl[0].pop(v_index)
+        ccl[0].append(new_prob)
+        new_factor.add_values(ccl)
+    return new_factor
         
     #You must implement this function
 
