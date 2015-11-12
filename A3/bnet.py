@@ -311,26 +311,33 @@ def restrict_factor(f, var, value):
     Return a new factor that is the restriction of f by this var = value.
     Don't change f! If f has only one variable its restriction yields a
     constant factor'''
-    new_vars = f.get_scope()
+
+
+    if var not in f.get_scope():
+        new_factor = copy.deepcopy(f)
+        return new_factor
+
+    new_vars = copy.deepcopy(f.get_scope())
 
     var_dom_list = []
     v_index = 0
     for i, vl in enumerate(new_vars):
-        if vl.name == var.name:
+        if vl == var:
             var_dom_list.append([value])
             v_index += i
         else:
             var_dom_list.append(vl.domain())
-    all_comb = itertools.product(var_dom_list) #check what iter tools does.
+    all_comb = itertools.product(*var_dom_list) #check what iter tools does.
+    list_all_comb = list(all_comb)
     new_vars.remove(var)
     new_factor = Factor("n-{}".format(f.name), new_vars)
 
-    for cc in all_comb:
+    for cc in list_all_comb:
         ccl = list(cc)
-        new_prob = f.get_value(ccl[0])
-        ccl[0].pop(v_index)
-        ccl[0].append(new_prob)
-        new_factor.add_values(ccl)
+        new_prob = f.get_value(ccl)
+        ccl.pop(v_index)
+        ccl.append(new_prob)
+        new_factor.add_values([ccl])
     return new_factor
         
     #You must implement this function
@@ -434,35 +441,37 @@ def VE(Net, QueryVar, EvidenceVars):
     #         hiddens.remove(h)
 
 
-    bn_factors = Net.factors()
-    for factor in bn_factors:
+    bn_factors = []
+
+    for factor in Net.factors():
         for e in EvidenceVars:
             if e in factor.get_scope():
                 factor = restrict_factor(factor, e, e.get_evidence())
-    hiddens = min_fill_ordering(bn_factors, QueryVar)
+        bn_factors.append(factor)
+    # hiddens = min_fill_ordering(bn_factors, QueryVar)
+    #
+    # for z in hiddens:
+    #     factors_over_z = get_factors_over_z(bn_factors, z) #TODO: implement get_factors_over_z(Net.Factors(), z)
+    #     new_factor = multiply_factors(factors_over_z)
+    #     for f in bn_factors:
+    #         if f in factors_over_z:
+    #             bn_factors.remove(f)
+    #     bn_factors.append(f)
+    #
+    # new_factor = multiply_factors(bn_factors)
+    # qv_dom = QueryVar.domain()
+    # qv_dist = []
+    # p_sum = 0
+    # for i, d in enumerate(qv_dom):
+    #     new_prob = new_factor.get_value([d])
+    #     qv_dist.append(new_prob)
+    #     p_sum += new_prob
+    #
+    # for npr in qv_dist:
+    #     npr /= p_sum
 
-    for z in hiddens:
-        factors_over_z = get_factors_over_z(bn_factors, z) #TODO: implement get_factors_over_z(Net.Factors(), z)
-        new_factor = multiply_factors(factors_over_z)
-        for f in bn_factors:
-            if f in factors_over_z:
-                bn_factors.remove(f)
-        bn_factors.append(f)
-
-    new_factor = multiply_factors(bn_factors)
-    qv_dom = QueryVar.domain()
-    qv_dist = []
-    p_sum = 0
-    for i, d in enumerate(qv_dom):
-        new_prob = new_factor.get_value([d])
-        qv_dist.append(new_prob)
-        p_sum += new_prob
-
-    for npr in qv_dist:
-        npr /= p_sum
-
-    return qv_dist
-
+    # return qv_dist
+    return bn_factors
 
 
 

@@ -76,13 +76,18 @@ F9.add_values([
 sn = BN('simple', [a,b,c,d,e,f,g,h,i], [F1,F2,F3,F4,F5,F6,F7,F8,F9])
 
 if __name__ == '__main__':
-    print("(a)")
+    # print("(a)")
     a.set_evidence('1')
-    F5.print_table()
-    print ("")
-    nf = restrict_factor(F5, c, 1)
-    nf.print_table()
-    # probs=VE(sn, b, [a])
+    b.set_evidence('1')
+    # F5.print_table()
+    # print ("")
+    # nf = restrict_factor(F5, c, '1')
+    # nf.print_table()
+    probs=VE(sn, c, [a,b])
+    for f in probs:
+        print("the table of {} is:".format(f.name))
+        f.print_table()
+        print('')
     # print("Pr(b|a) = {0:0.2f}".format(probs[1]))
     #
     # print("\n(b)")
