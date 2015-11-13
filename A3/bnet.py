@@ -301,6 +301,7 @@ class BN:
 def multiply_factors(Factors):
     '''return a new factor that is the product of the factors in Fators'''
 
+
     #You must implement this function
 
 
@@ -321,7 +322,7 @@ def restrict_factor(f, var, value):
 
     var_dom_list = []
     v_index = 0
-    for i, vl in enumerate(new_vars):
+    for i, vl in enumerate(f.get_scope()):
         if vl == var:
             var_dom_list.append([value])
             v_index += i
@@ -329,7 +330,7 @@ def restrict_factor(f, var, value):
             var_dom_list.append(vl.domain())
     all_comb = itertools.product(*var_dom_list) #check what iter tools does.
     list_all_comb = list(all_comb)
-    new_vars.remove(var)
+    new_vars.pop(v_index)
     new_factor = Factor("n-{}".format(f.name), new_vars)
 
     for cc in list_all_comb:
@@ -414,6 +415,15 @@ def remove_var(var, new_scope, scopes):
             
         
 ###
+
+def get_factors_over_z(all_factors, z_var):
+    f_over_z = []
+    for f in all_factors:
+        if z_var in f.get_scope():
+            f_over_z.append(f)
+    return f_over_z
+
+
 def VE(Net, QueryVar, EvidenceVars):
     '''
     Input: Net---a BN object (a Bayes Net)
@@ -448,7 +458,8 @@ def VE(Net, QueryVar, EvidenceVars):
             if e in factor.get_scope():
                 factor = restrict_factor(factor, e, e.get_evidence())
         bn_factors.append(factor)
-    # hiddens = min_fill_ordering(bn_factors, QueryVar)
+
+    hiddens = min_fill_ordering(bn_factors, QueryVar)
     #
     # for z in hiddens:
     #     factors_over_z = get_factors_over_z(bn_factors, z) #TODO: implement get_factors_over_z(Net.Factors(), z)
@@ -457,7 +468,7 @@ def VE(Net, QueryVar, EvidenceVars):
     #         if f in factors_over_z:
     #             bn_factors.remove(f)
     #     bn_factors.append(f)
-    #
+    # #
     # new_factor = multiply_factors(bn_factors)
     # qv_dom = QueryVar.domain()
     # qv_dist = []
