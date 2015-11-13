@@ -297,9 +297,32 @@ class BN:
     def variables(self):
         return list(self.Variables)
 
+def union_vars(Factors):
+    vars_set = set()
+    for f in Factors:
+        for v in f.get_scope():
+            vars_set.add(v)
+    return list(vars_set)
 
 def multiply_factors(Factors):
     '''return a new factor that is the product of the factors in Fators'''
+    new_vars = union_vars(Factors) #TODO:
+    new_factor = Factor("multi_factor", new_vars)
+    var_dom_list = [v.domain() for v in new_vars]
+    all_comb = itertools.product(*var_dom_list)
+    list_all_comb = list(all_comb)
+
+    for cur_comb in list_all_comb:
+        multi_tot = 1
+        for i, a_val in enumerate(cur_comb):
+            new_vars[i].set_assignment(a_val)
+        for f in Factors:
+            cur_value = f.get_value_at_current_assignments()
+            multi_tot *= cur_value
+        new_factor.add_value_at_current_assignment(multi_tot)
+
+    return new_factor
+
 
 
     #You must implement this function
@@ -346,6 +369,11 @@ def restrict_factor(f, var, value):
 def sum_out_variable(f, var):
     '''return a new factor that is the product of the factors in Factors
        followed by the suming out of Var'''
+
+
+
+
+    return new_factor
 
        #You must implement this function
 

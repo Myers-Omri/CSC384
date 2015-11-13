@@ -77,19 +77,24 @@ sn = BN('simple', [a,b,c,d,e,f,g,h,i], [F1,F2,F3,F4,F5,F6,F7,F8,F9])
 
 if __name__ == '__main__':
     # print("(a)")
-    a.set_evidence('1')
-    b.set_evidence('1')
+    # a.set_evidence('1')
+    # b.set_evidence('1')
+    nf2 = restrict_factor(F2,h,'1')
+    nfm2 = multiply_factors([F1,F2])
+    nf2.print_table()
     # F5.print_table()
     # print ("")
     # nf = restrict_factor(F5, c, '1')
     # nf.print_table()
-    probs=VE(sn, c, [a,b])
-    for f in probs:
-        print("the table of {} is:".format(f.name))
-        f.print_table()
-        print('')
+    # probs=VE(sn, c, [a,b])
+    # for f in probs:
+    #     print("the table of {} is:".format(f.name))
+    #     f.print_table()
+    #     print('')
     # print("Pr(b|a) = {0:0.2f}".format(probs[1]))
-    #
+
+    # nf = multiply_factors([F4, F5])
+    # nf.print_table()
     # print("\n(b)")
     # a.set_evidence('1')
     # probs=VE(sn, c, [a])
