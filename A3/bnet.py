@@ -338,10 +338,10 @@ def restrict_factor(f, var, value):
 
 
     if var not in f.get_scope():
-        new_factor = copy.deepcopy(f)
+        new_factor = f
         return new_factor
 
-    new_vars = copy.deepcopy(f.get_scope())
+    new_vars = f.get_scope()
 
     var_dom_list = []
     v_index = 0
@@ -354,7 +354,7 @@ def restrict_factor(f, var, value):
     all_comb = itertools.product(*var_dom_list) #check what iter tools does.
     list_all_comb = list(all_comb)
     new_vars.pop(v_index)
-    new_factor = Factor("n-{}".format(f.name), new_vars)
+    new_factor = Factor("r-{}".format(f.name), new_vars)
 
     for cc in list_all_comb:
         ccl = list(cc)
@@ -369,9 +369,30 @@ def restrict_factor(f, var, value):
 def sum_out_variable(f, var):
     '''return a new factor that is the product of the factors in Factors
        followed by the suming out of Var'''
+    new_vars = f.get_scope()
+    for i, v in enumerate(f.get_scope()):
+        if v == var:
+            new_vars.pop(i)
 
+    # restricted_factors_list = []
+    # for val in var.domain():
+    #     restricted_factors_list.append(restrict_factor(f, var, val), val)
 
+    new_factor = Factor("s-{},{}".format(f.name, var.name), new_vars)
 
+    var_dom_list = [v.domain() for v in new_vars]
+    all_comb = itertools.product(*var_dom_list)
+    list_all_comb = list(all_comb)
+
+    for cur_comb in list_all_comb:
+        sum_tot = 0
+        for rval in var.domain():
+            for j, a_val in enumerate(cur_comb):
+                new_vars[j].set_assignment(a_val)
+            var.set_assignment(rval)
+            cur_value = f.get_value_at_current_assignments()
+            sum_tot += cur_value
+        new_factor.add_value_at_current_assignment(sum_tot)
 
     return new_factor
 
@@ -488,29 +509,28 @@ def VE(Net, QueryVar, EvidenceVars):
         bn_factors.append(factor)
 
     hiddens = min_fill_ordering(bn_factors, QueryVar)
-    #
-    # for z in hiddens:
-    #     factors_over_z = get_factors_over_z(bn_factors, z) #TODO: implement get_factors_over_z(Net.Factors(), z)
-    #     new_factor = multiply_factors(factors_over_z)
-    #     for f in bn_factors:
-    #         if f in factors_over_z:
-    #             bn_factors.remove(f)
-    #     bn_factors.append(f)
-    # #
-    # new_factor = multiply_factors(bn_factors)
-    # qv_dom = QueryVar.domain()
-    # qv_dist = []
-    # p_sum = 0
-    # for i, d in enumerate(qv_dom):
-    #     new_prob = new_factor.get_value([d])
-    #     qv_dist.append(new_prob)
-    #     p_sum += new_prob
-    #
-    # for npr in qv_dist:
-    #     npr /= p_sum
+    for z in hiddens:
+        factors_over_z = get_factors_over_z(bn_factors, z)
+        for f in factors_over_z:
+            bn_factors.remove(f)
+        mulfi = multiply_factors(factors_over_z)
+        bn_factors.append(sum_out_variable(mulfi, z))
 
-    # return qv_dist
-    return bn_factors
+    new_factor = multiply_factors(bn_factors)
+    qv_dom = QueryVar.domain()
+    qv_dist = []
+    p_sum = 0
+    for i, d in enumerate(qv_dom):
+        new_prob = new_factor.get_value([d])
+        qv_dist.append(new_prob)
+        p_sum += new_prob
+
+    if p_sum > 0:
+        npr = [fp / p_sum for fp in qv_dist]
+    else:
+        npr = [float('inf') for fip in qv_dist]
+    return npr
+
 
 
 
