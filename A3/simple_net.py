@@ -1,5 +1,6 @@
 ##Simple Bayes net
 ##
+###trying!
 from bnet import *
 
 #'0' '1' for false/true
