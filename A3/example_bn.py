@@ -62,7 +62,7 @@ F8.add_values([['abnormal', 'true', 0.98],
                ['normal', 'true', 0.02],
                ['normal', 'false', 0.95]])
 
-Q3 = BN("Asia", [VisitAsia, Smoking, Tuberculosis, Cancer,
+Asia = BN("Asia", [VisitAsia, Smoking, Tuberculosis, Cancer,
                    Bronchitis, TBorCA, Dyspnea, Xray],
                    [F1, F2, F3, F4, F5, F6, F7, F8])
 
@@ -85,7 +85,7 @@ FS.add_values([['s', 'e', 'b', .9], ['s', 'e', '-b', .2], ['s', '-e', 'b', .8],[
 FG.add_values([['g', 's', 0.5], ['g', '-s', 0], ['-g', 's', 0.5], ['-g', '-s', 1]])
 FW.add_values([['w', 's', 0.8], ['w', '-s', .2], ['-w', 's', 0.2], ['-w', '-s', 0.8]])
 
-# Q3 = BN('SampleQ4', [E,B,S,G,W], [FE,FB,FS,FG,FW])
+Q3 = BN('SampleQ4', [E,B,S,G,W], [FE,FB,FS,FG,FW])
 
 if __name__ == '__main__':
     #(a)
