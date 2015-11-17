@@ -1,4 +1,6 @@
-'''Classes for variable elimination Routines 
+#Omri Myers 1001902177
+
+'''Classes for variable elimination Routines
    A) class Variable
 
       This class allows one to define Bayes Net variables.
@@ -306,7 +308,7 @@ def union_vars(Factors):
 
 def multiply_factors(Factors):
     '''return a new factor that is the product of the factors in Fators'''
-    new_vars = union_vars(Factors) #TODO:
+    new_vars = union_vars(Factors)
     new_factor = Factor("multi_factor", new_vars)
     var_dom_list = [v.domain() for v in new_vars]
     all_comb = itertools.product(*var_dom_list)
