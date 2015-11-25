@@ -102,7 +102,7 @@ if __name__ == "__main__":
             print("Solution:{} is ok".format(i))
         else:
             print("Solution:{} failed".format(i))
-        #print_sudo_soln(var_array)
+        print_sudo_soln(var_array)
 
         print("Using Model 2")
         csp, var_array = sudoku_csp_model_2(b)
